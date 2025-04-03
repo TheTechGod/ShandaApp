@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SHANDA</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="bg-dark text-white p-3">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <h1 class="mb-0 fw-bold">S.H.A.N.D.A</h1>
+            <nav>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    if (User.IsInRole("Admin"))
+                    {
+                        <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-light me-2">Admin Panel</a>
+                    }
+                    <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-light me-2">Dashboard</a>
+                    <a href="@Url.Action("ChangeAvatar", "Profile")" class="btn btn-outline-warning me-2">Avatar</a>
+                    <form method="post" asp-controller="Auth" asp-action="Logout" class="d-inline">
+                        <button type="submit" class="btn btn-light">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Auth")" class="btn btn-light">Login</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- LEFT COLUMN: AI Panel -->
+            <div class="col-md-3 text-center border-end">
+                <h5 class="fw-bold">SHANDA AI</h5>
+                <img src="@Url.Content(ViewBag.AvatarUrl ?? "~/img/avatars/users/default-avatar.png")" class="img-fluid rounded-circle mb-2 shadow" style="max-width: 160px;" alt="AI Avatar" />
+                <p class="fw-bold text-danger">@Html.Raw(ViewBag.AIResponse ?? "Hello from SHANDA.")</p>
+            </div>
+
+            <!-- RIGHT COLUMN: Main Content -->
+            <div class="col-md-9">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light text-center mt-4 p-2 border-top">
+        &copy; 2025 - SHANDA Assistant Platform
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/tts.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        const aiResponse = "@ViewBag.AIResponse";
+        if (aiResponse?.length > 0) {
+            setTimeout(() => speakText(aiResponse), 500);
+        }
+    </script>
+</body>
+</html>
