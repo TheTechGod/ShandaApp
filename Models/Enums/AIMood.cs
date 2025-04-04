@@ -4,6 +4,7 @@
     {
         Neutral,
         Friendly,
+        Motivational,
         Professional,
         Playful,
         Calm

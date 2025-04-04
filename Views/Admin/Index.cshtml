@@ -1,0 +1,122 @@
+﻿@model ShandaApp.Models.ViewModels.AdminPreferencesViewModel
+@using ShandaApp.Models.Enums
+
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+<h2 class="text-center">🛠 Admin Control Panel</h2>
+<p class="text-center">Welcome, Admin. This section is under construction.</p>
+<!-- ✅ Right Side: Admin Control Buttons -->
+<div class="col-md-7 d-flex flex-column justify-content-center text-center">
+    <form asp-action="UpdateToneAndMood" method="post">
+        <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" asp-for="UseAdminTone" />
+            <label class="form-check-label" for="UseAdminTone">
+                Admin
+            </label>
+        </div>
+
+        <div class="form-group mt-3">
+            <label asp-for="AIMood">SHANDA's Mood</label>
+            <select class="form-select" asp-for="AIMood"
+                    asp-items="Html.GetEnumSelectList<AIMood>()"
+                    onchange="speakMoodResponse(this.selectedIndex)">
+            </select>
+
+        </div>
+
+
+        <button type="submit" class="btn btn-primary mt-3" onclick="this.disabled=true; this.innerHTML='Saving…'; this.form.submit();">
+            💾 Save Preferences
+        </button>
+    </form>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
+
+    <!-- ✅ Buttons in a Circular Layout -->
+    @*  <div class="d-flex flex-wrap justify-content-center gap-4 mt-4 admin-button-circle">
+        <a href="@Url.Action("Index", "ToDo")" class="btn btn-lg btn-primary">Manage Tasks</a>
+        <a href="@Url.Action("Business", "Dashboard")" class="btn btn-info dashboard-btn">Business Tools</a>
+        <a href="@Url.Action("Users", "Admin")" class="btn btn-lg btn-secondary">Manage Users</a>
+        <a href="@Url.Action("Roles", "Admin")" class="btn btn-lg btn-info">Manage Roles</a>
+        <a href="@Url.Action("Subscribers", "Admin")" class="btn btn-lg btn-success">Subscribers</a>
+        <a href="@Url.Action("Settings", "Admin")" class="btn btn-lg btn-warning">App Settings</a>
+        <a href="@Url.Action("Reports", "Admin")" class="btn btn-lg btn-danger">Generate Reports</a>
+    </div> *@ 
+</div>
+
+
+
+@section Scripts {
+    <script>
+        const adminGreeting = "Admin panel activated. Ready when you are.";
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+
+            function getPreferredVoice() {
+                const voices = synth.getVoices();
+
+                // ✅ Look for known high-quality female voices across platforms
+                const preferredVoiceNames = [
+                    "Google US English",           // Chrome
+                    "Microsoft Zira Desktop",      // Edge/Windows
+                    "Samantha",                    // macOS
+                    "Google UK English Female"
+                ];
+
+                let voice = voices.find(v => preferredVoiceNames.includes(v.name));
+                if (!voice) {
+                    // Fallback: any female voice
+                    voice = voices.find(v =>
+                        v.name.toLowerCase().includes("female") ||
+                        v.name.toLowerCase().includes("zira") ||
+                        v.name.toLowerCase().includes("samantha")
+                    );
+                }
+
+                // Final fallback
+                return voice || voices[0];
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = getPreferredVoice();
+            utterance.rate = 1;
+            utterance.pitch = 1.1;
+
+            synth.cancel();
+            synth.speak(utterance);
+
+            console.log("🎙️ Voice used:", utterance.voice.name);
+        }
+
+        window.onload = () => {
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.onvoiceschanged = () => speak(adminGreeting);
+            } else {
+                speak(adminGreeting);
+            }
+        };
+
+        function speakMoodResponse(mood) {
+            const lines = {
+                0: "Ready and focused. Let's keep things moving.",
+                1: "Hi there! It's great to see you. Let's make today count!",
+                2: "You're unstoppable! Let's power through those tasks!",
+                3: "System is calibrated. Let’s execute with precision.",
+                4: "Haha, let's have some fun while we work today!",
+                5: "No rush. We're steady, calm, and in control."
+
+            };
+            speak(lines[mood] || "Mood updated.");
+        }
+    </script>
+}

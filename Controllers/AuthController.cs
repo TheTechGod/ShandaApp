@@ -121,6 +121,8 @@ namespace ShandaApp.Controllers
             {
                 TempData["AvatarUrl"] = user.AvatarUrl ?? "/img/avatars/users/default-avatar.png";
                 TempData["IsPersonalMode"] = user.IsPersonalMode.ToString();
+                TempData["PreferredVoice"] = user.PreferredVoice;
+
 
                 if (await _userManager.IsInRoleAsync(user, RoleConstants.Admin))
                     return RedirectToAction("Index", "Admin");
@@ -128,7 +130,8 @@ namespace ShandaApp.Controllers
                 if (await _userManager.IsInRoleAsync(user, RoleConstants.Kid))
                     return RedirectToAction("Index", "KidDashboard");
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("Dashboard", "Home");
+
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");

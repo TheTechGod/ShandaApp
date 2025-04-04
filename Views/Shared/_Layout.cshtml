@@ -10,6 +10,8 @@
     <title>@ViewData["Title"] - SHANDA</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/tts.js"></script>
+
 </head>
 <body>
     <header class="bg-dark text-white p-3">
@@ -25,7 +27,10 @@
                     <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-light me-2">Dashboard</a>
                     <a href="@Url.Action("ChangeAvatar", "Profile")" class="btn btn-outline-warning me-2">Avatar</a>
                     <form method="post" asp-controller="Auth" asp-action="Logout" class="d-inline">
-                        <button type="submit" class="btn btn-light">Logout</button>
+                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger ms-2">🚪 Logout</button>
+                            @Html.AntiForgeryToken()
+                        </form>
                     </form>
                 }
                 else
@@ -43,6 +48,8 @@
                 <h5 class="fw-bold">SHANDA AI</h5>
                 <img src="@Url.Content(ViewBag.AvatarUrl ?? "~/img/avatars/users/default-avatar.png")" class="img-fluid rounded-circle mb-2 shadow" style="max-width: 160px;" alt="AI Avatar" />
                 <p class="fw-bold text-danger">@Html.Raw(ViewBag.AIResponse ?? "Hello from SHANDA.")</p>
+                @* <button onclick="speakText('Welcome back to SHANDA.')">Test Voice</button> *@
+
             </div>
 
             <!-- RIGHT COLUMN: Main Content -->
@@ -66,6 +73,11 @@
     <script>
         const aiResponse = "@ViewBag.AIResponse";
         if (aiResponse?.length > 0) {
+            setTimeout(() => speakText(aiResponse), 500);
+        }
+
+            const aiResponse = "@ViewBag.AIResponse";
+        if (aiResponse && aiResponse.length > 0) {
             setTimeout(() => speakText(aiResponse), 500);
         }
     </script>
