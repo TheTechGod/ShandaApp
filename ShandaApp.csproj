@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\avatars\kids\Kassidy\" />
+    <Folder Include="wwwroot\img\avatars\kids\Kassidy\" />
   </ItemGroup>
 
 </Project>

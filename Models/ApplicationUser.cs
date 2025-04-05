@@ -14,5 +14,6 @@ namespace ShandaApp.Models
         public bool UseAdminTone { get; set; }
         public AIMood AIMood { get; set; }
 
+
     }
 }

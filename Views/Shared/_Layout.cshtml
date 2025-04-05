@@ -2,6 +2,22 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+
+    @using ShandaApp.Models.Enums
+@{
+    var mood = ViewBag.AIMood?.ToString() ?? "Neutral";
+    string moodColor = mood switch
+    {
+        "Motivational" => "text-success",
+        "Friendly" => "text-primary",
+        "Professional" => "text-dark",
+        "Playful" => "text-warning",
+        "Calm" => "text-info",
+        _ => "text-secondary"
+    };
+}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +63,8 @@
             <div class="col-md-3 text-center border-end">
                 <h5 class="fw-bold">SHANDA AI</h5>
                 <img src="@Url.Content(ViewBag.AvatarUrl ?? "~/img/avatars/users/default-avatar.png")" class="img-fluid rounded-circle mb-2 shadow" style="max-width: 160px;" alt="AI Avatar" />
-                <p class="fw-bold text-danger">@Html.Raw(ViewBag.AIResponse ?? "Hello from SHANDA.")</p>
+                <p class="mt-2 @moodColor">
+               @*  <p class="fw-bold text-danger">@Html.Raw(ViewBag.AIResponse ?? "Hello from SHANDA.")</p> *@
                 @* <button onclick="speakText('Welcome back to SHANDA.')">Test Voice</button> *@
 
             </div>
@@ -70,6 +87,10 @@
     <script src="~/js/tts.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
+    
+
+    
+@section Scripts {
     <script>
         const aiResponse = "@ViewBag.AIResponse";
         if (aiResponse?.length > 0) {
@@ -80,6 +101,68 @@
         if (aiResponse && aiResponse.length > 0) {
             setTimeout(() => speakText(aiResponse), 500);
         }
+
+        const currentMood = "@Model.AIMood";
+        const fallbackNames = [
+            "Google US English Female",
+            "Microsoft Zira Desktop - English (United States)",
+            "Google UK English Female",
+            "Samantha"
+        ];
+
+        function getFemaleVoice() {
+            const voices = speechSynthesis.getVoices();
+
+            // Look for preferred female voices first
+            for (const name of fallbackNames) {
+                const match = voices.find(v => v.name === name);
+                if (match) return match;
+            }
+
+            // Fallback to first female-like voice
+            const femaleGuess = voices.find(v =>
+                v.name.toLowerCase().includes("female") ||
+                v.name.toLowerCase().includes("zira") ||
+                v.name.toLowerCase().includes("samantha")
+            );
+
+            return femaleGuess || voices[0]; // absolute fallback
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = getFemaleVoice();
+            utterance.rate = 1;
+            utterance.pitch = 1.1;
+
+            synth.cancel();
+            synth.speak(utterance);
+            console.log("🔊 Voice used:", utterance.voice.name);
+        }
+
+        function speakMoodResponse(moodText) {
+            const lines = {
+                "Neutral": "Greetings, Boss. I'm standing by.",
+                "Friendly": "Hey Daddy! So good to see you!",
+                "Motivational": "We’ve got this. Let’s crush it today!",
+                "Professional": "All systems are operational and aligned, sir.",
+                "Playful": "Wanna do something fun while we work?",
+                "Calm": "Take a breath. Let’s ease into productivity."
+            };
+
+            speak(lines[moodText] || "Mood updated.");
+        }
+
+        window.onload = () => {
+            if (!speechSynthesis.getVoices().length) {
+                speechSynthesis.onvoiceschanged = () => speakMoodResponse(currentMood);
+            } else {
+                speakMoodResponse(currentMood);
+            }
+        };
     </script>
+ }
 </body>
 </html>

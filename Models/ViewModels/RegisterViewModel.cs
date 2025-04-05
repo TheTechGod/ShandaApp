@@ -39,5 +39,8 @@ namespace ShandaApp.Models.ViewModels
 
         [Display(Name = "Choose Avatar")]
         public string SelectedAvatar { get; set; }  // Will be validated in AuthController
+
+        
+
     }
 }

@@ -1,48 +1,72 @@
 ﻿@model ShandaApp.Models.ViewModels.AdminPreferencesViewModel
 @using ShandaApp.Models.Enums
+@{
+    string moodColor = Model.AIMood switch
+    {
+        AIMood.Motivational => "text-success",
+        AIMood.Friendly => "text-primary",
+        AIMood.Professional => "text-dark",
+        AIMood.Playful => "text-warning",
+        AIMood.Calm => "text-info",
+        _ => "text-secondary"
+    };
+}
 
 
 @{
     ViewData["Title"] = "Admin Dashboard";
+    var avatarUrl = TempData["AvatarUrl"]?.ToString() ?? "/img/avatars/admin/admin-avatar1.png";
+    var preferredVoice = TempData["PreferredVoice"]?.ToString() ?? "Google US English Female";
 }
+
+
 <h2 class="text-center">🛠 Admin Control Panel</h2>
 <p class="text-center">Welcome, Admin. This section is under construction.</p>
 <!-- ✅ Right Side: Admin Control Buttons -->
-<div class="col-md-7 d-flex flex-column justify-content-center text-center">
-    <form asp-action="UpdateToneAndMood" method="post">
-        <div class="form-check mt-3">
-            <input class="form-check-input" type="checkbox" asp-for="UseAdminTone" />
-            <label class="form-check-label" for="UseAdminTone">
-                Admin
-            </label>
-        </div>
-
-        <div class="form-group mt-3">
-            <label asp-for="AIMood">SHANDA's Mood</label>
-            <select class="form-select" asp-for="AIMood"
-                    asp-items="Html.GetEnumSelectList<AIMood>()"
-                    onchange="speakMoodResponse(this.selectedIndex)">
-            </select>
-
-        </div>
 
 
-        <button type="submit" class="btn btn-primary mt-3" onclick="this.disabled=true; this.innerHTML='Saving…'; this.form.submit();">
-            💾 Save Preferences
-        </button>
-    </form>
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+<div class="text-center mb-4">
+   @*  <img src="@Url.Content(avatarUrl)"
+         alt="Admin Avatar"
+         class="rounded-circle shadow"
+         style="width: 100px;" /> *@
+    <p class="mt-2 @moodColor">
+        Current Mood: <strong>@Model.AIMood</strong>
+    </p>
+</div>
+
+<form asp-action="UpdateToneAndMood" method="post">
+    <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" asp-for="UseAdminTone" />
+        <label class="form-check-label" asp-for="UseAdminTone">Admin</label>
+    </div>
+
+    <div class="form-group mt-3">
+        <label asp-for="AIMood">SHANDA's Mood</label>
+        <select class="form-select" asp-for="AIMood"
+                asp-items="Html.GetEnumSelectList<AIMood>()"
+                onchange="speakMoodResponse(this.options[this.selectedIndex].text)">
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3"
+            onclick="this.disabled=true; this.innerHTML='Saving…'; this.form.submit();">
+        💾 Save Preferences
+    </button>
+</form>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 
 
     <!-- ✅ Buttons in a Circular Layout -->
-    @*  <div class="d-flex flex-wrap justify-content-center gap-4 mt-4 admin-button-circle">
+     <div class="d-flex flex-wrap justify-content-center gap-4 mt-4 admin-button-circle">
         <a href="@Url.Action("Index", "ToDo")" class="btn btn-lg btn-primary">Manage Tasks</a>
         <a href="@Url.Action("Business", "Dashboard")" class="btn btn-info dashboard-btn">Business Tools</a>
         <a href="@Url.Action("Users", "Admin")" class="btn btn-lg btn-secondary">Manage Users</a>
@@ -50,73 +74,71 @@
         <a href="@Url.Action("Subscribers", "Admin")" class="btn btn-lg btn-success">Subscribers</a>
         <a href="@Url.Action("Settings", "Admin")" class="btn btn-lg btn-warning">App Settings</a>
         <a href="@Url.Action("Reports", "Admin")" class="btn btn-lg btn-danger">Generate Reports</a>
-    </div> *@ 
-</div>
+    </div>
 
 
 
 @section Scripts {
     <script>
-        const adminGreeting = "Admin panel activated. Ready when you are.";
+        const currentMood = "@Model.AIMood";
+        const fallbackNames = [
+            "Google US English Female",
+            "Microsoft Zira Desktop - English (United States)",
+            "Google UK English Female",
+            "Samantha"
+        ];
+
+        function getFemaleVoice() {
+            const voices = speechSynthesis.getVoices();
+
+            // Look for preferred female voices first
+            for (const name of fallbackNames) {
+                const match = voices.find(v => v.name === name);
+                if (match) return match;
+            }
+
+            // Fallback to first female-like voice
+            const femaleGuess = voices.find(v =>
+                v.name.toLowerCase().includes("female") ||
+                v.name.toLowerCase().includes("zira") ||
+                v.name.toLowerCase().includes("samantha")
+            );
+
+            return femaleGuess || voices[0]; // absolute fallback
+        }
 
         function speak(text) {
             const synth = window.speechSynthesis;
 
-            function getPreferredVoice() {
-                const voices = synth.getVoices();
-
-                // ✅ Look for known high-quality female voices across platforms
-                const preferredVoiceNames = [
-                    "Google US English",           // Chrome
-                    "Microsoft Zira Desktop",      // Edge/Windows
-                    "Samantha",                    // macOS
-                    "Google UK English Female"
-                ];
-
-                let voice = voices.find(v => preferredVoiceNames.includes(v.name));
-                if (!voice) {
-                    // Fallback: any female voice
-                    voice = voices.find(v =>
-                        v.name.toLowerCase().includes("female") ||
-                        v.name.toLowerCase().includes("zira") ||
-                        v.name.toLowerCase().includes("samantha")
-                    );
-                }
-
-                // Final fallback
-                return voice || voices[0];
-            }
-
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.voice = getPreferredVoice();
+            utterance.voice = getFemaleVoice();
             utterance.rate = 1;
             utterance.pitch = 1.1;
 
             synth.cancel();
             synth.speak(utterance);
+            console.log("🔊 Voice used:", utterance.voice.name);
+        }
 
-            console.log("🎙️ Voice used:", utterance.voice.name);
+        function speakMoodResponse(moodText) {
+            const lines = {
+                "Neutral": "Greetings, Boss. I'm standing by.",
+                "Friendly": "Hey Daddy! So good to see you!",
+                "Motivational": "We’ve got this. Let’s crush it today!",
+                "Professional": "All systems are operational and aligned, sir.",
+                "Playful": "Wanna do something fun while we work?",
+                "Calm": "Take a breath. Let’s ease into productivity."
+            };
+
+            speak(lines[moodText] || "Mood updated.");
         }
 
         window.onload = () => {
-            if (speechSynthesis.getVoices().length === 0) {
-                speechSynthesis.onvoiceschanged = () => speak(adminGreeting);
+            if (!speechSynthesis.getVoices().length) {
+                speechSynthesis.onvoiceschanged = () => speakMoodResponse(currentMood);
             } else {
-                speak(adminGreeting);
+                speakMoodResponse(currentMood);
             }
         };
-
-        function speakMoodResponse(mood) {
-            const lines = {
-                0: "Ready and focused. Let's keep things moving.",
-                1: "Hi there! It's great to see you. Let's make today count!",
-                2: "You're unstoppable! Let's power through those tasks!",
-                3: "System is calibrated. Let’s execute with precision.",
-                4: "Haha, let's have some fun while we work today!",
-                5: "No rush. We're steady, calm, and in control."
-
-            };
-            speak(lines[mood] || "Mood updated.");
-        }
     </script>
 }

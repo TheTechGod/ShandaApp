@@ -1,9 +1,14 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
-    var avatarUrl = TempData["AvatarUrl"]?.ToString() ?? "/img/avatars/users/default-avatar.png";
-    var userName = User.Identity?.Name ?? "User";
-    var preferredVoice = TempData["PreferredVoice"]?.ToString() ?? "female"; // Use lowercase variant
+﻿@using Microsoft.AspNetCore.Identity
+@using ShandaApp.Models
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var avatarUrl = currentUser?.AvatarUrl ?? "/img/avatars/users/default-avatar.png";
+    var userName = currentUser?.UserName ?? "User";
+    var preferredVoice = currentUser?.PreferredVoice ?? "female";
 }
+
 
 <h2 class="text-center mb-4">👋 Welcome back, @userName!</h2>
 
@@ -13,6 +18,7 @@
     <button onclick="speakGreeting('Welcome back, @userName. Your AI assistant is online.', '@preferredVoice')" class="btn btn-success mt-2">
         🎤 Speak Greeting
     </button>
+
 </div>
 
 @section Scripts {
@@ -22,4 +28,3 @@
         };
     </script>
 }
-
