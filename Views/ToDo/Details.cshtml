@@ -1,0 +1,35 @@
+﻿@model ShandaApp.Models.ToDoItem
+@using ShandaApp.Models.Enums
+
+@{
+    ViewData["Title"] = "Task Details";
+}
+
+<h2 class="mb-4">📝 Task: @Model.Title</h2>
+
+<ul class="list-group mb-3">
+    <li class="list-group-item"><strong>Subject:</strong> @Model.Subject</li>
+    <li class="list-group-item"><strong>Due Date:</strong> @Model.DueDate?.ToShortDateString()</li>
+    <li class="list-group-item"><strong>Status:</strong> @(Model.IsComplete ? "✅ Complete" : "❌ Pending")</li>
+</ul>
+
+<h4 class="mt-4">🧩 Subtasks</h4>
+<div id="subtaskContainer">
+    @if (Model.SubTasks != null && Model.SubTasks.Any())
+    {
+        @await Html.PartialAsync("_SubTaskList", Model.SubTasks)
+    }
+    else
+    {
+        <div class="alert alert-info">No subtasks yet.</div>
+    }
+</div>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">✏️ Edit Task</a>
+    <a asp-action="Index" class="btn btn-secondary">⬅️ Back</a>
+</div>
+
+@section Scripts {
+    <script src="~/js/subtasks.js"></script>
+}

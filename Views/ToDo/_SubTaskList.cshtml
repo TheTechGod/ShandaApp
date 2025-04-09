@@ -1,0 +1,35 @@
+﻿@model List<ShandaApp.Models.SubTask>
+@using ShandaApp.Models.Enums
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-group mt-3">
+        @foreach (var sub in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <form asp-action="UpdateStatus"
+                      asp-controller="SubTask"
+                      method="post"
+                      class="update-subtask-form d-flex w-100">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="id" value="@sub.Id" />
+                    <span class="me-auto">@sub.Title</span>
+
+                    <select name="status" class="form-select form-select-sm w-auto mx-2">
+                        <option value="Pending" selected="@(sub.Status == SubTaskStatus.Pending)">Pending</option>
+                        <option value="InProgress" selected="@(sub.Status == SubTaskStatus.InProgress)">In Progress</option>
+                        <option value="Completed" selected="@(sub.Status == SubTaskStatus.Completed)">Completed</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-sm btn-success">💾</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <div class="alert alert-info mt-3">No subtasks yet.</div>
+}

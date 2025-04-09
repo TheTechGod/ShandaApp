@@ -1,0 +1,81 @@
+﻿@model ShandaApp.Models.ToDoItem
+@{
+    ViewData["Title"] = "Create Task";
+}
+
+<h2>Create New Task</h2>
+
+<form asp-action="Create" method="post">
+    <input type="hidden" asp-for="UserId" />
+
+    <div class="mb-3">
+        <label class="form-label">Subject</label>
+        <input asp-for="Subject" class="form-control" />
+        <span asp-validation-for="Subject" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Due Date</label>
+        <input asp-for="DueDate" type="date" class="form-control" />
+    </div>
+
+    <!-- ✅ Subtask Section -->
+    <div class="mb-3">
+        <label class="form-label">Subtasks</label>
+        <div id="subtask-list">
+            <div class="input-group mb-2">
+                <input name="SubTasks[0].Title" class="form-control" placeholder="Subtask Title" />
+                <input type="hidden" name="SubTasks[0].Status" value="Pending" />
+            </div>
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addSubtask()">➕ Add Subtask</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger mt-3">
+            <strong>Validation Errors:</strong>
+            <ul>
+                @foreach (var entry in ViewData.ModelState)
+                {
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        <li>@entry.Key: @error.ErrorMessage</li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        let subtaskIndex = 1;
+
+        function addSubtask() {
+            const container = document.getElementById('subtask-list');
+
+            const newInputGroup = document.createElement('div');
+            newInputGroup.classList.add('input-group', 'mb-2');
+
+            newInputGroup.innerHTML = `
+                <input name="SubTasks[${subtaskIndex}].Title" class="form-control" placeholder="Subtask Title" />
+                <input type="hidden" name="SubTasks[${subtaskIndex}].Status" value="Pending" />
+            `;
+
+            container.appendChild(newInputGroup);
+            subtaskIndex++;
+        }
+    </script>
+}

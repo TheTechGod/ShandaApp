@@ -1,0 +1,30 @@
+﻿@model ShandaApp.Models.SubTask
+@using ShandaApp.Models.Enums
+
+@{
+    ViewData["Title"] = "Edit Subtask";
+}
+
+<h2>Edit Subtask</h2>
+
+<form asp-action="EditSubTask" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ToDoItemId" />
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select asp-for="Status" class="form-select">
+            <option value="@SubTaskStatus.Pending">Pending</option>
+            <option value="@SubTaskStatus.InProgress">In Progress</option>
+            <option value="@SubTaskStatus.Completed">Completed</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

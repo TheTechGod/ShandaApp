@@ -1,0 +1,30 @@
+﻿@model IEnumerable<ShandaApp.Models.SubTask>
+@using ShandaApp.Models.Enums
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-group">
+        @foreach (var sub in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>@sub.Title</strong>
+                    <span class="ms-2 badge
+                        @(sub.Status == SubTaskStatus.Completed ? "bg-success" :
+                          sub.Status == SubTaskStatus.InProgress ? "bg-warning text-dark" :
+                          "bg-secondary")">
+                        @sub.Status
+                    </span>
+                </div>
+                <div>
+                    <a asp-controller="SubTask" asp-action="EditSubTask" asp-route-id="@sub.Id" class="btn btn-sm btn-outline-warning">✏️ Edit</a>
+                    <a asp-controller="SubTask" asp-action="DeleteSubTask" asp-route-id="@sub.Id" class="btn btn-sm btn-outline-danger">🗑️ Delete</a>
+                </div>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted">No subtasks available.</p>
+}
